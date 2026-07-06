@@ -16,8 +16,10 @@ import {
   TrendingUp,
   UserCheck,
   Shield,
-  Cpu
+  Cpu,
+  ChevronDown
 } from "lucide-react";
+import { CustomRole } from "../types";
 
 export type SidebarTab =
   | 'coe'
@@ -44,6 +46,9 @@ interface SidebarProps {
   currentUser: { id: string; email: string; name: string } | null;
   userRoleName: string;
   onLogout: () => void;
+  roles: CustomRole[];
+  viewAsRoleId: string;
+  onChangeViewRole: (roleId: string) => void;
 }
 
 export default function Sidebar({
@@ -54,7 +59,10 @@ export default function Sidebar({
   userPermissions,
   currentUser,
   userRoleName,
-  onLogout
+  onLogout,
+  roles,
+  viewAsRoleId,
+  onChangeViewRole,
 }: SidebarProps) {
   const menuItems: Array<{
     id: SidebarTab;
@@ -96,6 +104,30 @@ export default function Sidebar({
             ENTERPRISE SaaS
           </span>
         </div>
+      </div>
+
+      {/* Role / Portal Switcher */}
+      <div className="px-4 py-3 border-b border-slate-800/60 bg-slate-900/30">
+        <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5 font-mono">
+          Visão do Portal
+        </label>
+        <div className="relative">
+          <select
+            value={viewAsRoleId}
+            onChange={(e) => onChangeViewRole(e.target.value)}
+            className="w-full appearance-none bg-slate-800 border border-slate-700 text-white rounded-lg text-xs px-3 py-2 pr-8 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 cursor-pointer font-medium"
+          >
+            {roles.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+          <ChevronDown size={12} className="absolute right-2.5 top-2.5 text-slate-400 pointer-events-none" />
+        </div>
+        {viewAsRoleId !== (roles.find(r => r.name === userRoleName)?.id ?? viewAsRoleId) && (
+          <p className="text-[10px] text-amber-400 mt-1.5 font-mono">
+            ⚠ Visualizando como outro perfil
+          </p>
+        )}
       </div>
 
       {/* Menu Items */}

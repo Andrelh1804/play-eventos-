@@ -173,6 +173,7 @@ export default function App() {
   const [roles, setRoles] = useState<CustomRole[]>(initialRoles);
   const [users, setUsers] = useState<PlatformUser[]>(initialUsers);
   const [activeUserId, setActiveUserId] = useState<string>("");
+  const [viewAsRoleId, setViewAsRoleId] = useState<string>("");
 
   // Core database tables in React state
   const [events, setEvents] = useState<Event[]>(initialEvents);
@@ -202,11 +203,14 @@ export default function App() {
   // Get active Firebase authenticated user and their permissions
   const activeUser = users.find(u => u.id === activeUserId);
   const activeUserRole = roles.find(r => r.id === activeUser?.roleId);
-  const userPermissions = activeUserRole?.permissions || {
+  const basePermissions = activeUserRole?.permissions || {
     coe: true, events: true, timeline: true, checklist: true, ticketing: true,
     finance: true, crm: true, sports: true, marketplace: true, chamados: true,
     staff: true, analytics: true, rbac: true, enterprise: true
   };
+  // If viewAsRoleId is set and different from own role, apply that role's permissions instead
+  const viewRole = viewAsRoleId ? roles.find(r => r.id === viewAsRoleId) : null;
+  const userPermissions = viewRole ? viewRole.permissions : basePermissions;
 
   // Enforce tab permissions upon simulated user or permission change
   useEffect(() => {
@@ -252,6 +256,11 @@ export default function App() {
           setUsers(loadedUsers);
           setActiveUserId(user.uid);
           setFirebaseUser(user);
+          // Initialize view-as role to the user's actual assigned role
+          const loggedUserProfile = loadedUsers.find(u => u.id === user.uid);
+          if (loggedUserProfile?.roleId) {
+            setViewAsRoleId(loggedUserProfile.roleId);
+          }
 
           // Fetch other business collections from Firestore
           const loadedEvents = await loadCollection<Event>("eventos_events", initialEvents);
@@ -1005,6 +1014,9 @@ export default function App() {
           currentUser={currentUserData}
           userRoleName={activeUserRole?.name || "Operador Autorizado"}
           onLogout={handleLogout}
+          roles={roles}
+          viewAsRoleId={viewAsRoleId || activeUser?.roleId || "admin"}
+          onChangeViewRole={setViewAsRoleId}
         />
 
         {/* Dynamic Main Workspace stage */}
