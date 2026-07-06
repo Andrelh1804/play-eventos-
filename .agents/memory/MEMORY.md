@@ -1,0 +1,1 @@
+- [Simulation audit & real implementation](simulation-audit.md) — full audit of all simulated/mock code removed; all modules now use real Firestore state.

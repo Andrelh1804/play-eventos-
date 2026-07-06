@@ -10,7 +10,6 @@ import {
   UserCheck, 
   Sparkles, 
   Flame, 
-  Calendar,
   AlertCircle
 } from "lucide-react";
 import { StaffMember, Event } from "../types";
@@ -18,16 +17,11 @@ import { StaffMember, Event } from "../types";
 interface StaffVolunteersProps {
   events: Event[];
   activeEventId: string;
+  staffMembers: StaffMember[];
+  addStaff: (member: Omit<StaffMember, 'id'>) => void;
+  rewardStaff: (id: string) => void;
+  updateStaffRating: (id: string, rating: number) => void;
 }
-
-const initialStaff: StaffMember[] = [
-  { id: "staff-1", name: "Renato Albuquerque", role: "coordinator", department: "Produção", points: 2450, rating: 4.9, attendance: 100, badges: ["Assiduidade Perfeita", "Estrela do Evento", "Mestre da Produção"], completedTasksCount: 18 },
-  { id: "staff-2", name: "Amanda Cavalcanti", role: "staff", department: "TI", points: 1800, rating: 4.8, attendance: 95, badges: ["Suporte Rápido", "Estrela do Evento"], completedTasksCount: 12 },
-  { id: "staff-3", name: "Bruna Maria Albuquerque", role: "volunteer", department: "Produção", points: 1550, rating: 5.0, attendance: 100, badges: ["Assiduidade Perfeita", "Estrela do Evento"], completedTasksCount: 10 },
-  { id: "staff-4", name: "Juliana Santos", role: "volunteer", department: "Segurança", points: 1200, rating: 4.6, attendance: 90, badges: ["Escudo Protetor"], completedTasksCount: 8 },
-  { id: "staff-5", name: "Arthur Azevedo", role: "staff", department: "Infraestrutura", points: 950, rating: 4.4, attendance: 85, badges: ["Mestre da Infraestrutura"], completedTasksCount: 6 },
-  { id: "staff-6", name: "Lucas Ferreira", role: "volunteer", department: "Limpeza", points: 700, rating: 4.7, attendance: 90, badges: ["Eco-Guardião"], completedTasksCount: 5 }
-];
 
 const availableBadges = [
   { id: "perfect_attendance", name: "Assiduidade Perfeita", description: "Presença integral confirmada em 100% dos turnos", icon: Trophy, color: "text-amber-400 border-amber-500/20 bg-amber-950/20" },
@@ -37,91 +31,42 @@ const availableBadges = [
   { id: "eco_guardian", name: "Eco-Guardião", description: "Destinação exemplar de lixo e limpeza da arena", icon: CheckCircle, color: "text-emerald-400 border-emerald-500/20 bg-emerald-950/20" }
 ];
 
-export default function StaffVolunteers({ events, activeEventId }: StaffVolunteersProps) {
-  const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
+export default function StaffVolunteers({
+  events,
+  activeEventId,
+  staffMembers,
+  addStaff,
+  rewardStaff,
+  updateStaffRating
+}: StaffVolunteersProps) {
   const [showAddForm, setShowAddForm] = useState(false);
-  
-  // Form States
   const [name, setName] = useState("");
   const [role, setRole] = useState<StaffMember['role']>("volunteer");
   const [department, setDepartment] = useState<StaffMember['department']>("Produção");
 
-  const activeEvent = events.find(e => e.id === activeEventId);
-
-  // Leaderboard sorted by points
-  const leaderboard = [...staff].sort((a, b) => b.points - a.points);
+  const leaderboard = [...staffMembers].sort((a, b) => b.points - a.points);
 
   const handleAddStaff = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name) return;
-
-    const newStaff: StaffMember = {
-      id: `staff-${Date.now()}`,
+    addStaff({
       name,
       role,
       department,
-      points: 200, // starting points
+      points: 200,
       rating: 4.5,
       attendance: 100,
       badges: ["Membro Oficial"],
       completedTasksCount: 0
-    };
-
-    setStaff(prev => [...prev, newStaff]);
+    });
     setName("");
     setRole("volunteer");
     setDepartment("Produção");
     setShowAddForm(false);
   };
 
-  // Reward points for tasks completion simulation
-  const rewardStaffTask = (staffId: string) => {
-    setStaff(prev => prev.map(s => {
-      if (s.id === staffId) {
-        const nextPoints = s.points + 150;
-        const nextTasks = s.completedTasksCount + 1;
-        let newBadges = [...s.badges];
-
-        // Level achievements checks
-        if (nextTasks >= 10 && !newBadges.includes("Assiduidade Perfeita")) {
-          newBadges.push("Assiduidade Perfeita");
-        }
-        if (nextPoints >= 2000 && !newBadges.includes("Mestre da Produção")) {
-          newBadges.push("Mestre da Produção");
-        }
-
-        return {
-          ...s,
-          points: nextPoints,
-          completedTasksCount: nextTasks,
-          badges: newBadges
-        };
-      }
-      return s;
-    }));
-  };
-
-  // Rate staff member
-  const updateRating = (staffId: string, rating: number) => {
-    setStaff(prev => prev.map(s => {
-      if (s.id === staffId) {
-        let newBadges = [...s.badges];
-        if (rating === 5.0 && !newBadges.includes("Estrela do Evento")) {
-          newBadges.push("Estrela do Evento");
-        }
-        return {
-          ...s,
-          rating,
-          badges: newBadges
-        };
-      }
-      return s;
-    }));
-  };
-
   return (
     <div className="space-y-6" id="staff-gamification-view">
-      {/* Header and Add Staff Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-4 gap-4">
         <div>
           <h2 className="text-xl font-bold text-white font-display">Staff & Voluntários (Gamificação)</h2>
@@ -137,7 +82,6 @@ export default function StaffVolunteers({ events, activeEventId }: StaffVoluntee
         </button>
       </div>
 
-      {/* Add New Staff Form */}
       {showAddForm && (
         <form onSubmit={handleAddStaff} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 max-w-2xl shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
           <h3 className="text-xs font-semibold text-slate-200 uppercase font-mono tracking-wider">Novo Integrante do Time Operacional</h3>
@@ -186,6 +130,13 @@ export default function StaffVolunteers({ events, activeEventId }: StaffVoluntee
 
           <div className="flex justify-end gap-2 pt-2">
             <button
+              type="button"
+              onClick={() => setShowAddForm(false)}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2 rounded-xl"
+            >
+              Cancelar
+            </button>
+            <button
               type="submit"
               className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs px-4 py-2 rounded-xl"
             >
@@ -195,10 +146,7 @@ export default function StaffVolunteers({ events, activeEventId }: StaffVoluntee
         </form>
       )}
 
-      {/* Main Layout Grid (Leaderboard + Badges & List) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Leaderboard Column (2 Spans on desktop) */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <div className="flex items-center gap-2">
@@ -210,111 +158,111 @@ export default function StaffVolunteers({ events, activeEventId }: StaffVoluntee
             </span>
           </div>
 
-          {/* Leaderboard rows */}
-          <div className="space-y-3">
-            {leaderboard.map((member, idx) => {
-              const medalColor = 
-                idx === 0 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                idx === 1 ? "bg-slate-300/20 text-slate-300 border-slate-300/30" :
-                idx === 2 ? "bg-amber-700/20 text-amber-600 border-amber-700/30" :
-                "bg-slate-950 text-slate-500 border-slate-850";
+          {leaderboard.length === 0 ? (
+            <div className="py-12 text-center space-y-2">
+              <Users className="h-8 w-8 text-slate-600 mx-auto" />
+              <p className="text-xs text-slate-500">Nenhum membro cadastrado.</p>
+              <p className="text-[11px] text-slate-600">Clique em "Cadastrar Integrante" para adicionar staff e voluntários.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {leaderboard.map((member, idx) => {
+                const medalColor = 
+                  idx === 0 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
+                  idx === 1 ? "bg-slate-300/20 text-slate-300 border-slate-300/30" :
+                  idx === 2 ? "bg-amber-700/20 text-amber-600 border-amber-700/30" :
+                  "bg-slate-950 text-slate-500 border-slate-850";
 
-              return (
-                <div 
-                  key={member.id} 
-                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all ${
-                    idx === 0 
-                      ? "bg-slate-950 border-amber-500/20 shadow-md shadow-amber-500/2" 
-                      : "bg-slate-950 border-slate-850 hover:border-slate-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Rank Indicator */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs border ${medalColor}`}>
-                      {idx + 1}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-xs font-bold text-slate-100">{member.name}</h4>
-                        <span className={`text-[9px] font-semibold font-mono px-1.5 py-0.2 rounded border ${
-                          member.role === 'coordinator' ? 'bg-purple-950/40 text-purple-400 border-purple-500/15' :
-                          member.role === 'staff' ? 'bg-cyan-950/40 text-cyan-400 border-cyan-500/15' :
-                          'bg-slate-850 text-slate-400 border-slate-700'
-                        }`}>
-                          {member.role === 'coordinator' ? 'Coordenador' : member.role === 'staff' ? 'Staff' : 'Voluntário'}
-                        </span>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-1.5 mt-1">
-                        <span className="text-[10px] text-slate-500 font-mono">Depto: <strong className="text-slate-400">{member.department}</strong></span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-[10px] text-slate-500 font-mono">Presença: <strong className="text-slate-300">{member.attendance}%</strong></span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-[10px] text-slate-500 font-mono">Tarefas: <strong className="text-slate-300">{member.completedTasksCount}</strong></span>
+                return (
+                  <div 
+                    key={member.id} 
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all ${
+                      idx === 0 
+                        ? "bg-slate-950 border-amber-500/20 shadow-md shadow-amber-500/2" 
+                        : "bg-slate-950 border-slate-850 hover:border-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono font-bold text-xs border ${medalColor}`}>
+                        {idx + 1}
                       </div>
 
-                      {/* Badges Earned row */}
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {member.badges.map((badgeName, bidx) => (
-                          <span key={bidx} className="text-[9px] font-sans font-medium px-1.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-1">
-                            <Sparkles className="h-2 w-2 text-indigo-400" />
-                            {badgeName}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-xs font-bold text-slate-100">{member.name}</h4>
+                          <span className={`text-[9px] font-semibold font-mono px-1.5 py-0.2 rounded border ${
+                            member.role === 'coordinator' ? 'bg-purple-950/40 text-purple-400 border-purple-500/15' :
+                            member.role === 'staff' ? 'bg-cyan-950/40 text-cyan-400 border-cyan-500/15' :
+                            'bg-slate-850 text-slate-400 border-slate-700'
+                          }`}>
+                            {member.role === 'coordinator' ? 'Coordenador' : member.role === 'staff' ? 'Staff' : 'Voluntário'}
                           </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions & Rating Column */}
-                  <div className="flex flex-row sm:flex-col items-end justify-between sm:justify-center gap-2 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-900">
-                    <div className="flex items-center gap-3">
-                      {/* Interactive XP Point Counter */}
-                      <div className="text-right">
-                        <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Pontuação</div>
-                        <div className="text-sm font-mono font-bold text-purple-400 flex items-center justify-end gap-1">
-                          <Zap className="h-3.5 w-3.5 fill-current text-purple-400" />
-                          {member.points} <span className="text-[10px] text-slate-500">XP</span>
                         </div>
-                      </div>
+                        
+                        <div className="flex flex-wrap gap-1.5 mt-1">
+                          <span className="text-[10px] text-slate-500 font-mono">Depto: <strong className="text-slate-400">{member.department}</strong></span>
+                          <span className="text-slate-600">•</span>
+                          <span className="text-[10px] text-slate-500 font-mono">Presença: <strong className="text-slate-300">{member.attendance}%</strong></span>
+                          <span className="text-slate-600">•</span>
+                          <span className="text-[10px] text-slate-500 font-mono">Tarefas: <strong className="text-slate-300">{member.completedTasksCount}</strong></span>
+                        </div>
 
-                      {/* Interactive Rating stars */}
-                      <div className="flex flex-col items-end">
-                        <span className="text-[9px] font-mono text-slate-500">Nota Operacional</span>
-                        <div className="flex items-center gap-0.5 mt-0.5">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              onClick={() => updateRating(member.id, star)}
-                              className={`p-0.5 transition-colors ${
-                                star <= Math.round(member.rating) ? "text-amber-400" : "text-slate-700 hover:text-slate-500"
-                              }`}
-                              title={`Avaliar com ${star} estrelas`}
-                            >
-                              <Star className="h-3.5 w-3.5 fill-current" />
-                            </button>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {member.badges.map((badgeName, bidx) => (
+                            <span key={bidx} className="text-[9px] font-sans font-medium px-1.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-slate-300 flex items-center gap-1">
+                              <Sparkles className="h-2 w-2 text-indigo-400" />
+                              {badgeName}
+                            </span>
                           ))}
                         </div>
                       </div>
                     </div>
 
-                    {/* Reward button */}
-                    <button
-                      onClick={() => rewardStaffTask(member.id)}
-                      className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-purple-500/40 text-slate-200 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all"
-                      style={{ minHeight: "44px" }}
-                    >
-                      <UserCheck className="h-3.5 w-3.5 text-purple-400" />
-                      Concluir Tarefa (+150 XP)
-                    </button>
+                    <div className="flex flex-row sm:flex-col items-end justify-between sm:justify-center gap-2 mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-900">
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">Pontuação</div>
+                          <div className="text-sm font-mono font-bold text-purple-400 flex items-center justify-end gap-1">
+                            <Zap className="h-3.5 w-3.5 fill-current text-purple-400" />
+                            {member.points} <span className="text-[10px] text-slate-500">XP</span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col items-end">
+                          <span className="text-[9px] font-mono text-slate-500">Nota Operacional</span>
+                          <div className="flex items-center gap-0.5 mt-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                onClick={() => updateStaffRating(member.id, star)}
+                                className={`p-0.5 transition-colors ${
+                                  star <= Math.round(member.rating) ? "text-amber-400" : "text-slate-700 hover:text-slate-500"
+                                }`}
+                                title={`Avaliar com ${star} estrelas`}
+                              >
+                                <Star className="h-3.5 w-3.5 fill-current" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => rewardStaff(member.id)}
+                        className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-purple-500/40 text-slate-200 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all"
+                        style={{ minHeight: "44px" }}
+                      >
+                        <UserCheck className="h-3.5 w-3.5 text-purple-400" />
+                        Concluir Tarefa (+150 XP)
+                      </button>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Right Column: Badges & Achievements Display */}
         <div className="space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
             <div className="border-b border-slate-800 pb-3">
@@ -322,14 +270,13 @@ export default function StaffVolunteers({ events, activeEventId }: StaffVoluntee
               <p className="text-xs text-slate-400 mt-0.5">Conquistas atribuídas por desempenho e assiduidade</p>
             </div>
 
-            {/* Badges Catalog */}
             <div className="space-y-3.5">
               {availableBadges.map((badge) => {
                 const IconComp = badge.icon;
                 return (
                   <div key={badge.id} className="flex gap-3 items-start p-3 bg-slate-950 rounded-xl border border-slate-850">
                     <div className={`p-2 rounded-xl border shrink-0 ${badge.color}`}>
-                      <IconComp className="h-4.5 w-4.5" />
+                      <IconComp className="h-4 w-4" />
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-slate-200">{badge.name}</h4>
@@ -341,7 +288,6 @@ export default function StaffVolunteers({ events, activeEventId }: StaffVoluntee
             </div>
           </div>
 
-          {/* Performance Summary Banner */}
           <div className="bg-gradient-to-br from-indigo-950/30 to-purple-950/20 border border-purple-500/10 rounded-2xl p-5 space-y-3 text-center relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl"></div>
             <Award className="h-8 w-8 text-purple-400 mx-auto" />

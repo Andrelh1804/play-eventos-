@@ -68,15 +68,21 @@ export default function CRMComercial({
     setShowAddContact(false);
   };
 
+  const [signSuccess, setSignSuccess] = useState(false);
+
   const handleExecuteSignature = () => {
     if (!selectedContractId || !signedName) {
       alert("Por favor digite o nome completo para assinar eletronicamente.");
       return;
     }
     signContract(selectedContractId);
-    setSelectedContractId(null);
+    setSignSuccess(true);
+    setIsSigning(false);
     setSignedName("");
-    alert("Contrato assinado eletronicamente com sucesso sob validade jurídica ICP-Brasil.");
+    setTimeout(() => {
+      setSelectedContractId(null);
+      setSignSuccess(false);
+    }, 3000);
   };
 
   const pipelineColumns = [
@@ -315,7 +321,13 @@ export default function CRMComercial({
 
           {/* Electronic Signature Pad Box */}
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between min-h-[250px]">
-            {selectedContractId ? (
+            {signSuccess ? (
+              <div className="flex-1 flex flex-col justify-center items-center text-center p-4 space-y-3">
+                <CheckCircle className="h-10 w-10 text-emerald-400" />
+                <p className="text-sm font-bold text-emerald-400">Contrato Assinado com Sucesso</p>
+                <p className="text-[11px] text-slate-400 leading-relaxed">O contrato foi marcado como assinado e registrado no sistema.</p>
+              </div>
+            ) : selectedContractId ? (
               <div className="space-y-4 flex-1 flex flex-col justify-between">
                 <div>
                   <h4 className="text-xs font-bold font-mono text-slate-300 uppercase tracking-widest mb-1">

@@ -17,7 +17,6 @@ interface DashboardCOEProps {
   ticketSales: TicketSale[];
   transactions: Transaction[];
   serviceTickets: ServiceTicket[];
-  triggerCheckInSimulation: () => void;
   addTransaction: (tx: Omit<Transaction, 'id'>) => void;
 }
 
@@ -68,13 +67,11 @@ export default function DashboardCOE({
   ticketSales,
   transactions,
   serviceTickets,
-  triggerCheckInSimulation,
   addTransaction
 }: DashboardCOEProps) {
   // --- CORE STATE ---
   const [activeModule, setActiveModule] = useState<NocModuleTab>('panels');
   const [selectedPanel, setSelectedPanel] = useState<SubPanelId>('executive');
-  const [simActive, setSimActive] = useState<boolean>(true);
   const [logs, setLogs] = useState<string[]>([]);
   const [activeDeviceView, setActiveDeviceView] = useState<'videowall' | 'desktop' | 'tablet' | 'smartphone'>('videowall');
   const [digitalTwinOverlay, setDigitalTwinOverlay] = useState<'crowd' | 'power' | 'traffic' | 'none'>('crowd');
@@ -240,62 +237,6 @@ export default function DashboardCOE({
     setLogs(initialLogs);
   }, [activeEventId]);
 
-  // Simulation ticking logic
-  useEffect(() => {
-    if (!simActive) return;
-
-    const interval = setInterval(() => {
-      // Trigger checkout check
-      triggerCheckInSimulation();
-
-      // Random telemetry fluctuations
-      setTelemetry(prev => {
-        const nextTemp = prev.generatorTemp + (Math.random() > 0.5 ? 1 : -1);
-        const nextCrowd = prev.crowdCount + Math.floor(Math.random() * 5) + 1;
-        const nextLoad = Math.max(65, Math.min(95, prev.generatorLoad + (Math.random() > 0.5 ? 2 : -2)));
-        const nextLatency = Math.max(8, Math.min(25, prev.apiLatencyMs + (Math.random() > 0.5 ? 1 : -1)));
-        
-        // Randomly trigger alerts on critical thresholds
-        if (nextTemp > 56 && !activeAlerts.some(a => a.id === 'temp-alert')) {
-          setActiveAlerts(prevAlerts => [
-            { id: 'temp-alert', message: "Temperatura do Subgerador #2 atingiu limite de atenção: " + nextTemp + "°C", severity: "warning", timestamp: new Date().toLocaleTimeString().slice(0, 5) },
-            ...prevAlerts
-          ]);
-        }
-
-        return {
-          ...prev,
-          generatorTemp: Math.max(45, Math.min(65, nextTemp)),
-          crowdCount: nextCrowd,
-          generatorLoad: nextLoad,
-          apiLatencyMs: nextLatency,
-          dbCpuLoad: Math.max(15, Math.min(80, prev.dbCpuLoad + (Math.random() > 0.5 ? 3 : -3)))
-        };
-      });
-
-      // Decrement active incident timers
-      setIncidents(prev => prev.map(inc => {
-        if (inc.status !== 'resolved' && inc.remainingMinutes > 0) {
-          return { ...inc, remainingMinutes: inc.remainingMinutes - 1 };
-        }
-        return inc;
-      }));
-
-      // Append random NOC operations logs
-      const randomOps = [
-        "Sinal de telemetria do drone de perímetro estável a 120m de altitude.",
-        "Equipe de bombeiros civis reporta: Rondas regulares sem intercorrências.",
-        "Consumo hídrico do pavilhão monitorado: Fluxo constante dentro da vazão padrão.",
-        "Check-in QR Code validado com sucesso pelo aplicativo operador do NOC.",
-        "Auditoria de segurança de rede: Zero ameaças de negação de serviço (DDoS) detectadas."
-      ];
-      const selectedLog = randomOps[Math.floor(Math.random() * randomOps.length)];
-      setLogs(prev => [`[${new Date().toLocaleTimeString()}] NOC Log: ${selectedLog}`, ...prev.slice(0, 15)]);
-
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [simActive, activeAlerts, triggerCheckInSimulation]);
 
   // --- HANDLERS ---
   const handleAddIncident = (e: React.FormEvent) => {
@@ -522,19 +463,9 @@ export default function DashboardCOE({
               </div>
             </div>
 
-            {/* Simulated indicators toggler */}
             <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-xs flex items-center gap-3">
-              <span className="text-slate-400 font-mono">Simulador Ativo:</span>
-              <button 
-                onClick={() => setSimActive(!simActive)}
-                className={`px-3 py-1 rounded font-mono font-bold text-[10px] uppercase transition-all ${
-                  simActive 
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' 
-                    : 'bg-slate-800 text-slate-500 border border-slate-700'
-                }`}
-              >
-                {simActive ? "Rodando" : "Pausado"}
-              </button>
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+              <span className="text-emerald-400 font-mono font-bold text-[10px] uppercase">NOC Online 24/7</span>
             </div>
           </div>
         </div>
@@ -803,7 +734,7 @@ export default function DashboardCOE({
                 <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-slate-200 font-display">Análise de Conversão & Vendas Comercial</span>
-                    <span className="text-[10px] font-mono text-cyan-400">Ritmo: {simActive ? "4.5 ingressos / min" : "Estável"}</span>
+                    <span className="text-[10px] font-mono text-cyan-400">Ritmo: 4.5 ingressos / min</span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">

@@ -1,23 +1,14 @@
-import React, { useState } from "react";
-import { ShoppingBag, Star, Phone, Check, HelpCircle, Briefcase, Sliders, ArrowUpRight } from "lucide-react";
+import React from "react";
+import { Star, Phone, Check } from "lucide-react";
 import { Provider } from "../types";
 
 interface MarketplaceProps {
   providers: Provider[];
   activeEventId: string;
+  contractProvider: (id: string, contracted: boolean) => void;
 }
 
-export default function MarketplaceFornecedores({ providers }: MarketplaceProps) {
-  const [hiredIds, setHiredIds] = useState<string[]>(["prov-1", "prov-2"]);
-
-  const toggleHire = (id: string) => {
-    if (hiredIds.includes(id)) {
-      setHiredIds(prev => prev.filter(i => i !== id));
-    } else {
-      setHiredIds(prev => [...prev, id]);
-    }
-  };
-
+export default function MarketplaceFornecedores({ providers, contractProvider }: MarketplaceProps) {
   return (
     <div className="space-y-6" id="marketplace-view">
       <div>
@@ -27,7 +18,7 @@ export default function MarketplaceFornecedores({ providers }: MarketplaceProps)
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {providers.map((prov) => {
-          const isHired = hiredIds.includes(prov.id);
+          const isContracted = prov.status === 'contracted';
           return (
             <div key={prov.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 hover:border-slate-700 transition-all flex flex-col justify-between">
               <div className="space-y-2">
@@ -56,15 +47,15 @@ export default function MarketplaceFornecedores({ providers }: MarketplaceProps)
                 </div>
 
                 <button
-                  onClick={() => toggleHire(prov.id)}
+                  onClick={() => contractProvider(prov.id, !isContracted)}
                   className={`w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                    isHired 
+                    isContracted 
                       ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-400' 
                       : 'bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300'
                   }`}
                   style={{ minHeight: '44px' }}
                 >
-                  {isHired ? (
+                  {isContracted ? (
                     <>
                       <Check className="h-4 w-4" />
                       Contratado

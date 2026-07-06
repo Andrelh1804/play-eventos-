@@ -52,7 +52,8 @@ import {
   ServiceTicket,
   EventTemplate,
   CustomRole,
-  PlatformUser
+  PlatformUser,
+  StaffMember
 } from "./types";
 
 const initialTemplates: EventTemplate[] = [
@@ -185,6 +186,7 @@ export default function App() {
   const [athletes, setAthletes] = useState<Athlete[]>(initialAthletes);
   const [providers, setProviders] = useState<Provider[]>(initialProviders);
   const [serviceTickets, setServiceTickets] = useState<ServiceTicket[]>(initialServiceTickets);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
 
   // Sync Status state
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced'>('idle');
@@ -263,6 +265,7 @@ export default function App() {
           const loadedAthletes = await loadCollection<Athlete>("eventos_athletes", initialAthletes);
           const loadedProviders = await loadCollection<Provider>("eventos_providers", initialProviders);
           const loadedServiceTickets = await loadCollection<ServiceTicket>("eventos_serviceTickets", initialServiceTickets);
+          const loadedStaff = await loadCollection<StaffMember>("eventos_staff", []);
 
           setEvents(loadedEvents);
           setTasks(loadedTasks);
@@ -275,6 +278,7 @@ export default function App() {
           setAthletes(loadedAthletes);
           setProviders(loadedProviders);
           setServiceTickets(loadedServiceTickets);
+          setStaffMembers(loadedStaff);
 
           setSyncStatus('synced');
 
@@ -379,6 +383,13 @@ export default function App() {
       await saveDocument("eventos_serviceTickets", item.id, item);
     });
   }, [serviceTickets, firebaseLoading, firebaseUser]);
+
+  useEffect(() => {
+    if (firebaseLoading || !firebaseUser) return;
+    staffMembers.forEach(async (item) => {
+      await saveDocument("eventos_staff", item.id, item);
+    });
+  }, [staffMembers, firebaseLoading, firebaseUser]);
 
   useEffect(() => {
     if (firebaseLoading || !firebaseUser) return;
@@ -540,6 +551,38 @@ export default function App() {
     triggerBriefSync();
   };
 
+  const handleAddTicketSale = (sale: Omit<TicketSale, 'id'>) => {
+    const id = `sale-${Date.now()}`;
+    const newSale = { ...sale, id };
+    setTicketSales(prev => [...prev, newSale]);
+    setTicketTiers(prev => prev.map(t => t.id === sale.tierId ? { ...t, sold: t.sold + 1 } : t));
+
+    const tier = ticketTiers.find(t => t.id === sale.tierId);
+    if (tier) {
+      handleAddTransaction({
+        eventId: sale.eventId,
+        type: 'income',
+        amount: tier.price,
+        category: 'Venda de Ingresso',
+        description: `Ingresso: ${tier.name} — ${sale.buyerName} (${sale.paymentMethod.toUpperCase()})`,
+        date: new Date().toISOString().split('T')[0],
+        centerOfCost: 'Bilheteria'
+      });
+    }
+
+    if (activeUser) {
+      logPlatformEvent(
+        activeUser.id,
+        activeUser.name,
+        activeUser.email,
+        `Nova venda de ingresso registrada: ${sale.buyerName} — lote ${tier?.name || sale.tierId}`,
+        "Bilheteria",
+        newSale
+      );
+    }
+    triggerBriefSync();
+  };
+
   const handleToggleCheckIn = (saleId: string) => {
     setTicketSales(prev => prev.map(s => {
       if (s.id === saleId) {
@@ -554,7 +597,7 @@ export default function App() {
             activeUser.id,
             activeUser.name,
             activeUser.email,
-            `Credenciamento RFID validado para o participante: ${s.buyerName} - Tipo: ${s.ticketType}`,
+            `Credenciamento RFID validado para o participante: ${s.buyerName} (${s.buyerEmail})`,
             "Operações",
             updated
           );
@@ -638,29 +681,45 @@ export default function App() {
     triggerBriefSync();
   };
 
-  // Live simulation trigger (Recepção Checkin)
-  const handleTriggerCheckInSimulation = () => {
-    const activeUncheckedSales = ticketSales.filter(s => s.eventId === activeEventId && !s.checkedIn);
-    if (activeUncheckedSales.length === 0) {
-      alert("Todos os participantes deste evento já foram credenciados!");
-      return;
-    }
-    // Pick first unchecked sale
-    const saleToCheckIn = activeUncheckedSales[0];
-    handleToggleCheckIn(saleToCheckIn.id);
+  // Staff management handlers
+  const handleAddStaff = (member: Omit<StaffMember, 'id'>) => {
+    const id = `staff-${Date.now()}`;
+    setStaffMembers(prev => [...prev, { ...member, id }]);
+    triggerBriefSync();
+  };
 
-    // Append mock service system ticket logging the scan
-    const sysTicket: ServiceTicket = {
-      id: `tkt-${Date.now()}`,
-      eventId: activeEventId,
-      title: `Check-In QR Code: ${saleToCheckIn.buyerName}`,
-      department: "Produção",
-      status: "closed",
-      priority: "medium",
-      description: `Entrada autorizada e validada via APP Receptor #01 às ${new Date().toLocaleTimeString("pt-BR")}.`,
-      createdAt: new Date().toISOString()
-    };
-    setServiceTickets(prev => [sysTicket, ...prev]);
+  const handleRewardStaff = (staffId: string) => {
+    setStaffMembers(prev => prev.map(s => {
+      if (s.id === staffId) {
+        const nextPoints = s.points + 150;
+        const nextTasks = s.completedTasksCount + 1;
+        const newBadges = [...s.badges];
+        if (nextTasks >= 10 && !newBadges.includes("Assiduidade Perfeita")) newBadges.push("Assiduidade Perfeita");
+        if (nextPoints >= 2000 && !newBadges.includes("Mestre da Produção")) newBadges.push("Mestre da Produção");
+        return { ...s, points: nextPoints, completedTasksCount: nextTasks, badges: newBadges };
+      }
+      return s;
+    }));
+    triggerBriefSync();
+  };
+
+  const handleUpdateStaffRating = (staffId: string, rating: number) => {
+    setStaffMembers(prev => prev.map(s => {
+      if (s.id === staffId) {
+        const newBadges = [...s.badges];
+        if (rating === 5 && !newBadges.includes("Estrela do Evento")) newBadges.push("Estrela do Evento");
+        return { ...s, rating, badges: newBadges };
+      }
+      return s;
+    }));
+    triggerBriefSync();
+  };
+
+  const handleContractProvider = (providerId: string, contracted: boolean) => {
+    setProviders(prev => prev.map(p =>
+      p.id === providerId ? { ...p, status: contracted ? 'contracted' : 'available' } : p
+    ));
+    triggerBriefSync();
   };
 
   // Apply AI Cognitive Generated Plan Data directly to event structures
@@ -689,33 +748,19 @@ export default function App() {
       priority: item.priority || 'medium'
     }));
 
-    // 3. Map pricing suggestions to Ticket Tiers
+    // 3. Map pricing suggestions to Ticket Tiers (sold starts at 0 — only real sales increment this)
     const newTiers: TicketTier[] = (aiData.pricingSuggestions || []).map((item: any, idx: number) => ({
       id: `tier-ai-${Date.now()}-${idx}`,
       eventId: activeEventId,
       name: item.name,
       price: Number(item.price) || 150,
       capacity: 1000,
-      sold: Math.floor(Math.random() * 400) + 100 // Seed with simulated sold quantities
+      sold: 0
     }));
-
-    // 4. Inject matching income transaction for sold seats to reflect on the charts immediately
-    const generatedIncome = newTiers.reduce((acc, curr) => acc + (curr.sold * curr.price), 0);
-    const mockTx: Transaction = {
-      id: `tx-ai-${Date.now()}`,
-      eventId: activeEventId,
-      type: 'income',
-      amount: generatedIncome,
-      category: 'Venda Ingressos',
-      description: `Lançamento de Receitas Estimadas da IA (${newTiers.map(t => `${t.sold} ${t.name}`).join(', ')})`,
-      date: new Date().toISOString().split('T')[0],
-      centerOfCost: 'Comercial'
-    };
 
     setTasks(prev => [...newTasks, ...prev]);
     setChecklists(prev => [...newChecklists, ...prev]);
     setTicketTiers(prev => [...newTiers, ...prev]);
-    setTransactions(prev => [mockTx, ...prev]);
 
     triggerBriefSync();
   };
@@ -732,7 +777,6 @@ export default function App() {
             serviceTickets={serviceTickets}
             events={events}
             activeEventId={activeEventId}
-            triggerCheckInSimulation={handleTriggerCheckInSimulation}
             addTransaction={handleAddTransaction}
           />
         );
@@ -779,8 +823,8 @@ export default function App() {
             events={events}
             activeEventId={activeEventId}
             addTicketTier={handleAddTicketTier}
+            addTicketSale={handleAddTicketSale}
             toggleCheckIn={handleToggleCheckIn}
-            triggerCheckInSimulation={handleTriggerCheckInSimulation}
           />
         );
       case "finance":
@@ -816,6 +860,7 @@ export default function App() {
           <MarketplaceFornecedores 
             providers={providers}
             activeEventId={activeEventId}
+            contractProvider={handleContractProvider}
           />
         );
       case "chamados":
@@ -832,6 +877,10 @@ export default function App() {
           <StaffVolunteers 
             events={events}
             activeEventId={activeEventId}
+            staffMembers={staffMembers}
+            addStaff={handleAddStaff}
+            rewardStaff={handleRewardStaff}
+            updateStaffRating={handleUpdateStaffRating}
           />
         );
       case "analytics":
