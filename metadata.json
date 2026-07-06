@@ -1,0 +1,6 @@
+{
+  "name": "PLAY+EVENTOS",
+  "description": "Event Operating System (EventOS) for comprehensive management of all event stages: planning, operation, ticket sales, CRM, budgeting, and intelligent AI features.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

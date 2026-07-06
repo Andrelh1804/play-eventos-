@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is authenticated in the system
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Explicit Rules for App Collections
+    match /users/{userId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /roles/{roleId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /eventos_events/{eventId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /eventos_transactions/{transactionId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /audit_logs/{logId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Global Catch-all Rule for authenticated operations
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "CustomRole": {
+      "title": "CustomRole",
+      "description": "User access control permissions matrix",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "isSystem": { "type": "boolean" },
+        "permissions": { "type": "object" }
+      },
+      "required": ["id", "name", "permissions"]
+    },
+    "PlatformUser": {
+      "title": "PlatformUser",
+      "description": "User profile with role affiliation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "roleId": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "name", "email", "roleId", "status"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Megaevent entry details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "venue": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "date", "venue", "status"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Financial cash flow ledger transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "eventId": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["id", "eventId", "description", "amount", "type", "category", "date"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable structured logs for platform actions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "time": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "action": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["id", "time", "userId", "userName", "userEmail", "action", "type"]
+    }
+  },
+  "firestore": {
+    "roles": {
+      "schema": "CustomRole",
+      "description": "RBAC Roles"
+    },
+    "users": {
+      "schema": "PlatformUser",
+      "description": "User registry"
+    },
+    "eventos_events": {
+      "schema": "Event",
+      "description": "Events data list"
+    },
+    "eventos_transactions": {
+      "schema": "Transaction",
+      "description": "Financial log"
+    },
+    "audit_logs": {
+      "schema": "AuditLog",
+      "description": "Governance trails"
+    }
+  }
+}
