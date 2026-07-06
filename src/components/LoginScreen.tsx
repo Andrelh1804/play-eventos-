@@ -19,17 +19,20 @@ import {
   RefreshCw,
   Info,
   Chrome,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from "lucide-react";
 import { CustomRole } from "../types";
 import { handleFirebaseError, FriendlyError } from "../lib/errorHandler";
+import PlayLogo from "./PlayLogo";
 
 interface LoginScreenProps {
   roles: CustomRole[];
   onAuthSuccess: (userId: string, userEmail: string, userName: string) => void;
+  onBackToLanding?: () => void;
 }
 
-export default function LoginScreen({ roles, onAuthSuccess }: LoginScreenProps) {
+export default function LoginScreen({ roles, onAuthSuccess, onBackToLanding }: LoginScreenProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -193,35 +196,46 @@ export default function LoginScreen({ roles, onAuthSuccess }: LoginScreenProps) 
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 font-sans" id="firebase-auth-screen">
-      <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="min-h-screen bg-black text-zinc-100 flex flex-col items-center justify-center p-4 font-sans relative" id="firebase-auth-screen">
+      <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-yellow-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[30rem] h-[30rem] bg-yellow-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
+      {onBackToLanding && (
+        <button 
+          onClick={onBackToLanding}
+          className="absolute top-6 left-6 flex items-center gap-2 text-xs font-mono text-zinc-500 hover:text-yellow-500 transition-colors bg-zinc-900/40 border border-zinc-800/80 hover:border-yellow-500/20 px-4 py-2 rounded-xl"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar para o site
+        </button>
+      )}
+
+      <div className="w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
         
         {/* Header Branding */}
-        <div className="text-center space-y-1.5">
-          <div className="inline-flex p-3 bg-indigo-950/40 rounded-2xl border border-indigo-500/20 mb-2">
-            <Shield className="h-8 w-8 text-indigo-400 animate-pulse" />
+        <div className="text-center space-y-2">
+          <div className="flex justify-center mb-1">
+            <PlayLogo size="sm" showReflection={false} />
           </div>
-          <h1 className="text-2xl font-bold font-display text-white tracking-tight">EVENTOS OS</h1>
-          <p className="text-xs text-slate-400 font-mono uppercase tracking-wider">Play+ Cognitive Core System</p>
+          <p className="text-[10px] text-yellow-500 font-mono uppercase tracking-widest font-bold">Play+ Cognitive Core System</p>
         </div>
 
         {/* Auth Tabs */}
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-850">
+        <div className="flex bg-black p-1 rounded-xl border border-zinc-900">
           <button
+            type="button"
             onClick={() => { setIsSignUp(false); setError(""); setFriendlyError(null); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              !isSignUp ? "bg-slate-900 text-indigo-300 shadow-md" : "text-slate-400 hover:text-slate-200"
+            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              !isSignUp ? "bg-zinc-900 text-yellow-500 shadow-md border border-zinc-800" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             Entrar
           </button>
           <button
+            type="button"
             onClick={() => { setIsSignUp(true); setError(""); setFriendlyError(null); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              isSignUp ? "bg-slate-900 text-indigo-300 shadow-md" : "text-slate-400 hover:text-slate-200"
+            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              isSignUp ? "bg-zinc-900 text-yellow-500 shadow-md border border-zinc-800" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             Cadastrar
@@ -255,17 +269,17 @@ export default function LoginScreen({ roles, onAuthSuccess }: LoginScreenProps) 
             type="button"
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-slate-200"
+            className="w-full bg-zinc-900 hover:bg-zinc-850 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2.5 cursor-pointer border border-zinc-800"
             style={{ minHeight: "44px" }}
           >
-            <Chrome className="h-4 w-4 text-slate-800" />
+            <Chrome className="h-4 w-4 text-yellow-500" />
             Entrar com o Google
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="h-[1px] bg-slate-800/80 flex-1"></div>
-            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Ou via E-mail Corporativo</span>
-            <div className="h-[1px] bg-slate-800/80 flex-1"></div>
+            <div className="h-[1px] bg-zinc-900 flex-1"></div>
+            <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">Ou via E-mail Corporativo</span>
+            <div className="h-[1px] bg-zinc-900 flex-1"></div>
           </div>
         </div>
 
@@ -274,58 +288,58 @@ export default function LoginScreen({ roles, onAuthSuccess }: LoginScreenProps) 
           
           {isSignUp && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5 text-slate-500" /> Nome Completo
+              <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5 text-zinc-500" /> Nome Completo
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: André Luis"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                className="w-full bg-black border border-zinc-900 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all"
                 required
               />
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5 text-slate-500" /> E-mail Operacional
+            <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+              <Mail className="h-3.5 w-3.5 text-zinc-500" /> E-mail Operacional
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Ex: seu@email.com.br"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full bg-black border border-zinc-900 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all"
               required
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-              <Lock className="h-3.5 w-3.5 text-slate-500" /> Senha Segura
+            <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+              <Lock className="h-3.5 w-3.5 text-zinc-500" /> Senha Segura
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo de 6 caracteres"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+              className="w-full bg-black border border-zinc-900 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all"
               required
             />
           </div>
 
           {isSignUp && (
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400">Atribuir Perfil de Acesso Corporativo</label>
+              <label className="text-xs font-medium text-zinc-400">Atribuir Perfil de Acesso Corporativo</label>
               <select
                 value={roleId}
                 onChange={(e) => setRoleId(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                className="w-full bg-black border border-zinc-900 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all cursor-pointer"
               >
                 {roles.map(r => (
-                  <option key={r.id} value={r.id} className="bg-slate-950 text-slate-300">
+                  <option key={r.id} value={r.id} className="bg-black text-zinc-300">
                     {r.name}
                   </option>
                 ))}
@@ -336,7 +350,7 @@ export default function LoginScreen({ roles, onAuthSuccess }: LoginScreenProps) 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 hover:from-yellow-400 hover:to-amber-400 text-black font-bold text-xs py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
             style={{ minHeight: "44px" }}
           >
             {loading ? (
@@ -354,48 +368,52 @@ export default function LoginScreen({ roles, onAuthSuccess }: LoginScreenProps) 
         </form>
 
         {/* Demo Fast Login presets */}
-        <div className="border-t border-slate-850 pt-5 space-y-3">
-          <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-            <Sparkles className="h-3 w-3 text-cyan-400 animate-pulse" />
+        <div className="border-t border-zinc-900 pt-5 space-y-3">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
+            <Sparkles className="h-3 w-3 text-yellow-500 animate-pulse" />
             <span>Preservar Perfis de Demonstração (Fast Sandbox)</span>
           </div>
           
           <div className="grid grid-cols-2 gap-2">
             <button
+              type="button"
               onClick={() => handleDemoLogin("admin")}
-              className="bg-slate-950 hover:bg-slate-850 border border-slate-800 text-left p-2.5 rounded-xl transition-all"
+              className="bg-black hover:bg-zinc-900 border border-zinc-900 hover:border-yellow-500/20 text-left p-2.5 rounded-xl transition-all"
             >
-              <span className="block text-[10px] font-bold text-slate-300">CEO / Administrador</span>
-              <span className="block text-[8px] text-slate-500 mt-0.5">Acesso total irrestrito</span>
+              <span className="block text-[10px] font-bold text-zinc-300">CEO / Administrador</span>
+              <span className="block text-[8px] text-zinc-500 mt-0.5">Acesso total irrestrito</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDemoLogin("operacional")}
-              className="bg-slate-950 hover:bg-slate-850 border border-slate-800 text-left p-2.5 rounded-xl transition-all"
+              className="bg-black hover:bg-zinc-900 border border-zinc-900 hover:border-yellow-500/20 text-left p-2.5 rounded-xl transition-all"
             >
-              <span className="block text-[10px] font-bold text-slate-300">Gerente Operacional</span>
-              <span className="block text-[8px] text-slate-500 mt-0.5">COE, Kanban & Checklists</span>
+              <span className="block text-[10px] font-bold text-zinc-300">Gerente Operacional</span>
+              <span className="block text-[8px] text-zinc-500 mt-0.5">COE, Kanban & Checklists</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDemoLogin("financeiro")}
-              className="bg-slate-950 hover:bg-slate-850 border border-slate-800 text-left p-2.5 rounded-xl transition-all"
+              className="bg-black hover:bg-zinc-900 border border-zinc-900 hover:border-yellow-500/20 text-left p-2.5 rounded-xl transition-all"
             >
-              <span className="block text-[10px] font-bold text-slate-300">Diretor Financeiro</span>
-              <span className="block text-[8px] text-slate-500 mt-0.5">Faturamento & BI</span>
+              <span className="block text-[10px] font-bold text-zinc-300">Diretor Financeiro</span>
+              <span className="block text-[8px] text-zinc-500 mt-0.5">Faturamento & BI</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDemoLogin("staff_campo")}
-              className="bg-slate-950 hover:bg-slate-850 border border-slate-800 text-left p-2.5 rounded-xl transition-all"
+              className="bg-black hover:bg-zinc-900 border border-zinc-900 hover:border-yellow-500/20 text-left p-2.5 rounded-xl transition-all"
             >
-              <span className="block text-[10px] font-bold text-slate-300">Staff / Apoio</span>
-              <span className="block text-[8px] text-slate-500 mt-0.5">Painel simplificado</span>
+              <span className="block text-[10px] font-bold text-zinc-300">Staff / Apoio</span>
+              <span className="block text-[8px] text-zinc-500 mt-0.5">Painel simplificado</span>
             </button>
           </div>
         </div>
 
         {/* Security badge and token note */}
-        <div className="bg-slate-950/40 p-3 rounded-xl border border-slate-850/80 flex items-start gap-2.5">
-          <Info className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
-          <p className="text-[10px] text-slate-400 leading-normal">
+        <div className="bg-black p-3 rounded-xl border border-zinc-900 flex items-start gap-2.5">
+          <Info className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
+          <p className="text-[10px] text-zinc-400 leading-normal">
             <strong>Autenticação via JWT Tokens</strong>: Todas as credenciais de e-mail e senha são criptografadas e processadas diretamente pelo nó do Firebase Auth do Google.
           </p>
         </div>

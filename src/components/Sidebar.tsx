@@ -81,11 +81,11 @@ export default function Sidebar({
 
 
   return (
-    <aside className="w-full lg:w-72 bg-slate-950 border-r border-slate-800 flex flex-col justify-between shrink-0 h-auto lg:h-[calc(100vh-73px)] sticky top-[73px] z-30" id="app-sidebar">
+    <aside className="w-full lg:w-72 bg-black border-r border-zinc-900 flex flex-col justify-between shrink-0 h-auto lg:h-[calc(100vh-73px)] sticky top-[73px] z-30" id="app-sidebar">
       <div className="p-4 flex-1 overflow-y-auto space-y-6">
         {/* Navigation items */}
         <div className="space-y-1">
-          <p className="px-3 text-[10px] font-mono tracking-widest text-slate-500 uppercase font-semibold mb-3">Módulos do Sistema</p>
+          <p className="px-3 text-[10px] font-mono tracking-widest text-zinc-500 uppercase font-semibold mb-3">Módulos do Sistema</p>
           {menuItems.map((item) => {
             if (!userPermissions[item.id]) return null;
             const Icon = item.icon;
@@ -96,20 +96,20 @@ export default function Sidebar({
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-3 rounded-xl text-left text-sm font-medium transition-all group ${
                   isActive 
-                    ? 'bg-gradient-to-r from-cyan-950 to-slate-900 border-l-4 border-cyan-500 text-cyan-400' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                    ? 'bg-zinc-900 border-l-4 border-yellow-500 text-yellow-500' 
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
                 }`}
                 id={`sidebar-tab-${item.id}`}
               >
                 <div className="flex items-center gap-3">
                   <Icon className={`h-[18px] w-[18px] transition-colors ${
-                    isActive ? 'text-cyan-400' : 'text-slate-500 group-hover:text-slate-300'
+                    isActive ? 'text-yellow-500' : 'text-zinc-500 group-hover:text-zinc-300'
                   }`} />
                   <span className="truncate">{item.label}</span>
                 </div>
                 {item.badge && (
                   <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded border leading-none tracking-wide font-semibold ${
-                    item.badgeColor || 'bg-slate-800 text-slate-400 border-slate-700'
+                    item.badgeColor || 'bg-zinc-850 text-zinc-400 border-zinc-800'
                   }`}>
                     {item.badge}
                   </span>
@@ -120,15 +120,15 @@ export default function Sidebar({
         </div>
 
         {/* AI Copilot shortcut status indicator */}
-        <div className="bg-gradient-to-br from-indigo-950/40 to-slate-900/40 p-4 rounded-xl border border-indigo-950/60 shadow-lg shadow-indigo-950/10">
+        <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-900 shadow-lg shadow-black/10">
           <div className="flex items-center gap-2 mb-2">
-            <BrainCircuit className="h-4 w-4 text-indigo-400 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-200 font-display">PLAY+COGNITIVE</span>
+            <BrainCircuit className="h-4 w-4 text-yellow-500 animate-pulse" />
+            <span className="text-xs font-semibold text-zinc-200 font-display">PLAY+ COGNITIVE</span>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed mb-3">Assessor de inteligência artificial ativo e contextualizado.</p>
+          <p className="text-xs text-zinc-400 leading-relaxed mb-3">Assessor de inteligência artificial ativo e contextualizado.</p>
           <button 
             onClick={() => setCopilotOpen(!copilotOpen)}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-medium py-1.5 px-3 rounded-lg text-xs transition-all shadow-md shadow-indigo-500/20"
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-black font-medium py-1.5 px-3 rounded-lg text-xs transition-all shadow-md shadow-yellow-500/20 cursor-pointer"
           >
             <Sparkles className="h-3 w-3" />
             {copilotOpen ? 'Ocultar Assessor' : 'Chamar Assessor'}
@@ -137,30 +137,30 @@ export default function Sidebar({
       </div>
 
       {/* User profile & Logout footer info inside Sidebar */}
-      <div className="p-4 border-t border-slate-900 bg-slate-950/90 space-y-3">
+      <div className="p-4 border-t border-zinc-900 bg-black space-y-3">
         {currentUser && (
-          <div className="flex items-center justify-between bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
+          <div className="flex items-center justify-between bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-white uppercase">{currentUser.name.slice(0, 2)}</span>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-500 to-amber-500 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-black uppercase">{currentUser.name.slice(0, 2)}</span>
               </div>
               <div className="min-w-0">
-                <span className="block text-xs font-semibold text-slate-200 truncate">{currentUser.name}</span>
-                <span className="block text-[9px] font-mono text-cyan-400 uppercase tracking-wider">{userRoleName}</span>
+                <span className="block text-xs font-semibold text-zinc-200 truncate">{currentUser.name}</span>
+                <span className="block text-[9px] font-mono text-yellow-500 uppercase tracking-wider">{userRoleName}</span>
               </div>
             </div>
             
             <button
               onClick={onLogout}
-              className="p-1.5 hover:bg-rose-950/30 hover:text-rose-400 text-slate-500 rounded-lg transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-zinc-800 hover:text-red-400 text-zinc-500 rounded-lg transition-colors cursor-pointer"
               title="Sair do Sistema"
             >
               <LogOut className="h-4 w-4" />
             </button>
           </div>
         )}
-        <div className="text-center font-mono text-[9px] text-slate-600 leading-normal">
-          <div>EventOS v2.4.0-Enterprise</div>
+        <div className="text-center font-mono text-[9px] text-zinc-600 leading-normal">
+          <div>EventOS v8.0-Enterprise</div>
           <div>Criptografia de Sessão Ativa</div>
         </div>
       </div>

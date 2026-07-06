@@ -22,6 +22,7 @@ import { signOut } from "firebase/auth";
 import { loadCollection, saveDocument, deleteDocument } from "./lib/firestoreService";
 import { logPlatformEvent } from "./lib/auditLogger";
 import LoginScreen from "./components/LoginScreen";
+import LandingPage from "./components/LandingPage";
 
 import { 
   initialEvents, 
@@ -157,6 +158,7 @@ export default function App() {
   const [activeEventId, setActiveEventId] = useState("evt-1");
   const [tenant, setTenant] = useState("Play+ Holding Brasil");
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [viewingLanding, setViewingLanding] = useState(true);
 
   // Event Templates State
   const [templates, setTemplates] = useState<EventTemplate[]>(initialTemplates);
@@ -880,6 +882,7 @@ export default function App() {
           "Acesso"
         );
       }
+      setViewingLanding(true);
       await signOut(auth);
     } catch (err) {
       console.error("Erro ao deslogar:", err);
@@ -892,18 +895,24 @@ export default function App() {
 
   if (firebaseLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center space-y-4 font-sans text-slate-100" id="firebase-loading-spinner">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-4 font-sans text-zinc-100" id="firebase-loading-spinner">
         <div className="relative flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full border-4 border-indigo-950/50 border-t-indigo-500 animate-spin"></div>
-          <div className="absolute w-6 h-6 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-            <span className="text-[10px] font-bold text-cyan-400">P+</span>
-          </div>
+          <div className="w-12 h-12 rounded-full border-4 border-zinc-900 border-t-yellow-500 animate-spin"></div>
         </div>
         <div className="text-center space-y-1">
-          <h4 className="text-sm font-bold tracking-wider font-mono text-slate-400 uppercase">Sincronia Firebase Activa</h4>
-          <p className="text-xs text-slate-500">Conectando ao EventOS Cognitive Core...</p>
+          <h4 className="text-xs font-bold tracking-widest font-mono text-yellow-500 uppercase">Sincronia Firebase Ativa</h4>
+          <p className="text-xs text-zinc-500">Conectando ao EventOS Cognitive Core...</p>
         </div>
       </div>
+    );
+  }
+
+  if (viewingLanding) {
+    return (
+      <LandingPage 
+        onEnterPlatform={() => setViewingLanding(false)} 
+        totalEventsCount={events.length} 
+      />
     );
   }
 
@@ -912,6 +921,7 @@ export default function App() {
       <LoginScreen 
         roles={roles} 
         onAuthSuccess={handleAuthSuccess} 
+        onBackToLanding={() => setViewingLanding(true)}
       />
     );
   }

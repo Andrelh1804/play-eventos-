@@ -86,20 +86,20 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
   ];
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-[600px] flex flex-col justify-between" id="ai-copilot-view">
+    <div className="bg-zinc-950 border border-zinc-900 rounded-2xl p-6 h-[600px] flex flex-col justify-between" id="ai-copilot-view">
       
       {/* Copilot Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 shrink-0">
+      <div className="flex items-center justify-between border-b border-zinc-900 pb-3 mb-4 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-purple-500 via-indigo-500 to-cyan-500 text-white shadow-md shadow-indigo-500/10">
-            <Sparkles className="h-4.5 w-4.5 text-white" />
+          <div className="p-2 rounded-xl bg-yellow-500 text-black shadow-md shadow-yellow-500/10">
+            <Sparkles className="h-4.5 w-4.5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-100 font-display">PLAY+COGNITIVE AI Copilot</h3>
-            <p className="text-[11px] text-slate-400">Contextualizado ao evento: <strong className="text-cyan-400">{activeEvent?.name}</strong></p>
+            <h3 className="text-sm font-bold text-zinc-100 font-display">PLAY+COGNITIVE AI Copilot</h3>
+            <p className="text-[11px] text-zinc-400">Contextualizado ao evento: <strong className="text-yellow-500">{activeEvent?.name}</strong></p>
           </div>
         </div>
-        <span className="text-[10px] font-mono text-purple-400 font-semibold bg-purple-950 border border-purple-500/15 px-2 py-0.5 rounded uppercase">Modelo Ativo</span>
+        <span className="text-[10px] font-mono text-yellow-500 font-semibold bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded uppercase">Modelo Ativo</span>
       </div>
 
       {/* Messages Thread box */}
@@ -114,8 +114,8 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
               {/* Avatar indicator */}
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
                 isAI 
-                  ? 'bg-slate-950 border-slate-800 text-cyan-400' 
-                  : 'bg-gradient-to-tr from-cyan-600 to-indigo-600 border-cyan-500 text-white'
+                  ? 'bg-black border-zinc-900 text-yellow-500' 
+                  : 'bg-yellow-500 border-yellow-500 text-black'
               }`}>
                 {isAI ? <Bot className="h-4.5 w-4.5" /> : <User className="h-4.5 w-4.5" />}
               </div>
@@ -123,8 +123,8 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
               {/* Msg bubble card */}
               <div className={`rounded-2xl p-4 text-xs leading-relaxed space-y-2 border ${
                 isAI 
-                  ? 'bg-slate-950 border-slate-850/80 text-slate-300' 
-                  : 'bg-slate-900 border-indigo-500/20 text-slate-200'
+                  ? 'bg-black border-zinc-900 text-zinc-300' 
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-200'
               }`}>
                 <div className="prose prose-invert prose-xs text-xs">
                   {/* Clean custom markdown bold text parser for UI */}
@@ -135,7 +135,7 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
                       <p key={lidx} className="mb-1 leading-relaxed">
                         {parts.map((part, pidx) => {
                           if (pidx % 2 === 1) {
-                            return <strong key={pidx} className="text-cyan-400 font-bold">{part}</strong>;
+                            return <strong key={pidx} className="text-yellow-500 font-bold">{part}</strong>;
                           }
                           return part;
                         })}
@@ -150,12 +150,12 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
 
         {loading && (
           <div className="flex gap-3 max-w-2xl">
-            <div className="w-8 h-8 rounded-xl bg-slate-950 border border-slate-850 text-cyan-400 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-black border border-zinc-900 text-yellow-500 flex items-center justify-center shrink-0">
               <Bot className="h-4 w-4" />
             </div>
-            <div className="bg-slate-950 border border-slate-850 rounded-2xl p-4 flex items-center gap-2">
-              <Loader2 className="h-4 w-4 text-cyan-400 animate-spin" />
-              <span className="text-xs text-slate-400 font-mono">Processando inteligência cognitiva...</span>
+            <div className="bg-black border border-zinc-900 rounded-2xl p-4 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
+              <span className="text-xs text-zinc-400 font-mono">Processando inteligência cognitiva...</span>
             </div>
           </div>
         )}
@@ -175,11 +175,11 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
                 <button
                   key={idx}
                   onClick={() => handleSendMessage(suggestion.text)}
-                  className="flex-1 text-left bg-slate-950 hover:bg-slate-950/60 border border-slate-800 hover:border-slate-700 p-2.5 rounded-xl text-[11px] text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer"
+                  className="flex-1 text-left bg-black hover:bg-zinc-900 border border-zinc-900 hover:border-zinc-800 p-2.5 rounded-xl text-[11px] text-zinc-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <Icon className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+                  <Icon className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
                   <span className="truncate">{suggestion.text}</span>
-                  <ArrowRight className="h-3.5 w-3.5 text-slate-500 ml-auto shrink-0" />
+                  <ArrowRight className="h-3.5 w-3.5 text-zinc-500 ml-auto shrink-0" />
                 </button>
               );
             })}
@@ -199,13 +199,13 @@ export default function AICopilot({ events, activeEventId }: AICopilotProps) {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Pergunte ao Co-piloto (Ex: Como organizar o credenciamento de ciclistas?)"
-            className="w-full bg-slate-950 text-slate-200 pl-4 pr-12 py-3 rounded-xl border border-slate-800 text-xs focus:outline-none focus:border-cyan-500 transition-colors"
+            className="w-full bg-black text-zinc-200 pl-4 pr-12 py-3 rounded-xl border border-zinc-900 text-xs focus:outline-none focus:border-yellow-500 transition-colors"
             style={{ minHeight: '44px' }}
           />
           <button
             type="submit"
             disabled={!inputValue.trim() || loading}
-            className="absolute right-2 top-2 p-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white transition-all disabled:opacity-30 cursor-pointer"
+            className="absolute right-2 top-2 p-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black transition-all disabled:opacity-30 cursor-pointer"
             style={{ minHeight: '36px', minWidth: '36px' }}
           >
             <Send className="h-4.5 w-4.5" />
